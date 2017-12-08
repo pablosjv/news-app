@@ -29,15 +29,22 @@ const data = [
   }
 ];
 
+function isSearched(searchTerm) {
+  return item =>
+    !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      data: data
+      data,
+      searchTerm: ''
     };
 
     this.removeItem = this.removeItem.bind(this);
+    this.searchValue = this.searchValue.bind(this);
   }
 
   removeItem(id) {
@@ -47,10 +54,51 @@ class App extends Component {
     this.setState({ data: updatedData });
   }
 
+  searchValue(event) {
+    this.setState({ searchTerm: event.target.value });
+  }
+
   render() {
+    const { data, searchTerm } = this.state;
+
     return (
       <div className="App">
-        {this.state.data.map(item => (
+        <Search onChange={this.searchValue} value={searchTerm}>
+            Search here
+        </Search>
+
+        <Table
+          data={data}
+          searchTerm={searchTerm}
+          removeItem={this.removeItem}
+        />
+      </div>
+    );
+  }
+}
+
+class Search extends Component {
+  // constructor() {}
+  render() {
+    return (
+      <form>
+          {this.props.children}
+        <input
+          type="text"
+          onChange={this.props.onChange}
+          value={this.props.value}
+        />
+      </form>
+    );
+  }
+}
+
+class Table extends Component {
+  render() {
+    const { data, searchTerm, removeItem } = this.props;
+    return (
+      <div>
+        {data.filter(isSearched(searchTerm)).map(item => (
           <div key={item.objectID}>
             <h1>
               {' '}
@@ -59,10 +107,7 @@ class App extends Component {
             <h4>
               {item.num_comments} Comments | {item.points} points
             </h4>
-            <button
-              type="button"
-              onClick={() => this.removeItem(item.objectID)}
-            >
+            <button type="button" onClick={() => removeItem(item.objectID)}>
               Remove item
             </button>
           </div>

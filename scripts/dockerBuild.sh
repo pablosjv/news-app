@@ -1,1 +1,1 @@
-docker build -t node-test:latest .
+docker build -t node-test:$1 .
