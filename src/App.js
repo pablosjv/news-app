@@ -11,8 +11,13 @@ const PATH_BASE = 'http://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 
+const DEFAULT_PAGE = 0;
+const PARAM_PAGE = 'page=';
+
 // const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
-const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${
+  PARAM_PAGE
+}${DEFAULT_PAGE}`;
 console.log(url);
 
 function isSearched(searchTerm) {
@@ -41,21 +46,25 @@ class App extends Component {
   }
 
   // fetch data from the api
-  fetchTopStories(searchTerm) {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+  fetchTopStories(searchTerm, page) {
+    fetch(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${
+        page
+      }`
+    )
       .then(response => response.json())
       .then(result => this.setTopStories(result))
       .catch(e => e);
   }
   // componen did mount
   componentDidMount() {
-    this.fetchTopStories(this.state.searchTerm);
+    this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
   }
 
   // search new query in the API
-  onSubmit(event){
-      this.fetchTopStories(this.state.searchTerm);
-      event.preventDefault()
+  onSubmit(event) {
+    this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
+    event.preventDefault();
   }
 
   removeItem(id) {
@@ -73,15 +82,17 @@ class App extends Component {
 
   render() {
     const { result, searchTerm } = this.state;
-    // if (!result){
-    //     return null;
-    // }
+    const page = (result && result.page) || 0;
     return (
       <div>
         <Grid fluid>
           <Row>
             <div className="jumbotron text-center">
-              <Search onChange={this.searchValue} value={searchTerm} onSubmit={this.onSubmit}>
+              <Search
+                onChange={this.searchValue}
+                value={searchTerm}
+                onSubmit={this.onSubmit}
+              >
                 News App
               </Search>
             </div>
@@ -94,6 +105,9 @@ class App extends Component {
             removeItem={this.removeItem}
           />
         )}
+        <Button onClick={() => this.fetchTopStories(searchTerm, page + 1)}>
+          Load More
+        </Button>
       </div>
     );
   }
@@ -163,7 +177,7 @@ class Table extends Component {
     const { data, searchTerm, removeItem } = this.props;
     return (
       <div className="col-sm-10 col-sm-offset-1">
-          {/* data.filter(isSearched(searchTerm)) */}
+        {/* data.filter(isSearched(searchTerm)) */}
         {data.map(item => (
           <div key={item.objectID}>
             <h1>
