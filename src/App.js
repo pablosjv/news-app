@@ -14,12 +14,13 @@ const PARAM_SEARCH = 'query=';
 const DEFAULT_PAGE = 0;
 const PARAM_PAGE = 'page=';
 
-const DEFAULT_HPP = 100; // DEFAULT HITS PER PAGE
+const DEFAULT_HPP = 25; // DEFAULT HITS PER PAGE
 const PARAM_HPP = 'hitsPerPage=';
 
 // const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${
-  PARAM_PAGE}${DEFAULT_PAGE}&${PARAM_HPP}${DEFAULT_HPP}`;
+  PARAM_PAGE
+}${DEFAULT_PAGE}&${PARAM_HPP}${DEFAULT_HPP}`;
 console.log(url);
 
 function isSearched(searchTerm) {
@@ -42,16 +43,26 @@ class App extends Component {
     this.setTopStories = this.setTopStories.bind(this);
     this.fetchTopStories = this.fetchTopStories.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.checkTopStoriesSearchTerm = this.checkTopStoriesSearchTerm.bind(this);
   }
+
+  checkTopStoriesSearchTerm(searchTerm) {
+    return !this.state.results[searchTerm];
+  }
+
   // update with top stories fetched
   setTopStories(result) {
     const { hits, page } = result;
     // const oldHits = page === 0 ? [] : this.state.result.hits;
-    const {searchKey, results} = this.state;
-    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
-
+    const { searchKey, results } = this.state;
+    const oldHits =
+      results && results[searchKey] ? results[searchKey].hits : [];
     const updatedHits = [...oldHits, ...hits];
-    this.setState({ results: { ...results, [searchKey]: {hits: updatedHits, page: page } }});
+
+    this.setState({
+      results: { ...results, [searchKey]: { hits: updatedHits, page } }
+    });
+    console.log(this.state);
   }
 
   // fetch data from the api
@@ -67,25 +78,33 @@ class App extends Component {
   }
   // componen did mount
   componentDidMount() {
-      this.setState({searchKey: this.state.searchTerm})
+    this.setState({ searchKey: this.state.searchTerm });
     this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
   }
 
   // search new query in the API
   onSubmit(event) {
-      this.setState({searchKey: this.state.searchTerm})
+    const { searchTerm } = this.state;
+    this.setState({ searchKey: searchTerm });
+    if (this.checkTopStoriesSearchTerm(searchTerm)) {
+      this.fetchTopStories(searchTerm, DEFAULT_PAGE);
+    }
 
-    this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
     event.preventDefault();
   }
 
   removeItem(id) {
     let isNotID = item => item.objectID !== id;
-    const updatedHits = this.state.result.hits.filter(isNotID);
+    const { results, searchKey } = this.state;
+    const { hits, page } = results[searchKey];
+    const updatedHits = hits.filter(isNotID);
     // Object assignment to modified the hits in result
     // this.setState({ result: Object.assign({}, this.state.result, {hits: updatedHits}) });
     // Spread Operator ES6
-    this.setState({ result: { ...this.state.result, hits: updatedHits } });
+    console.log({ ...results, [searchKey]: { hits: updatedHits, page } });
+    this.setState({
+      results: { ...results, [searchKey]: { hits: updatedHits, page } }
+    });
   }
 
   searchValue(event) {
@@ -94,8 +113,11 @@ class App extends Component {
 
   render() {
     const { results, searchTerm, searchKey } = this.state;
-    const page = (results && results[searchKey] && results[searchKey].page) || 0;
-    const list = (results && results[searchKey] && results[searchKey].list) || [];
+    const page =
+      (results && results[searchKey] && results[searchKey].page) || 0;
+    const list =
+      (results && results[searchKey] && results[searchKey].hits) || [];
+    console.log(page, list);
     return (
       <div>
         <Grid fluid>
@@ -111,21 +133,24 @@ class App extends Component {
             </div>
           </Row>
         </Grid>
-        {results && (
-          <Table
-            data={list}
-            searchTerm={searchTerm}
-            removeItem={this.removeItem}
-          />
-        )}
-        <div className="text-center alert">
-          <Button
-            className="btn btn-success"
-            onClick={() => this.fetchTopStories(searchTerm, page + 1)}
-          >
-            Load More
-          </Button>
-        </div>
+
+        <Grid>
+          <Row>
+            <Table
+              data={list}
+              searchTerm={searchTerm}
+              removeItem={this.removeItem}
+            />
+            <div className="text-center alert">
+              <Button
+                className="btn btn-success"
+                onClick={() => this.fetchTopStories(searchTerm, page + 1)}
+              >
+                Load More
+              </Button>
+            </div>
+          </Row>
+        </Grid>
       </div>
     );
   }
