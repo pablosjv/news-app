@@ -14,10 +14,12 @@ const PARAM_SEARCH = 'query=';
 const DEFAULT_PAGE = 0;
 const PARAM_PAGE = 'page=';
 
+const DEFAULT_HPP = 100; // DEFAULT HITS PER PAGE
+const PARAM_HPP = 'hitsPerPage=';
+
 // const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${
-  PARAM_PAGE
-}${DEFAULT_PAGE}`;
+  PARAM_PAGE}${DEFAULT_PAGE}&${PARAM_HPP}${DEFAULT_HPP}`;
 console.log(url);
 
 function isSearched(searchTerm) {
@@ -30,7 +32,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      result: null,
+      results: null,
+      searchKey: '',
       searchTerm: DEFAULT_QUERY
     };
 
@@ -42,7 +45,13 @@ class App extends Component {
   }
   // update with top stories fetched
   setTopStories(result) {
-    this.setState({ result: result });
+    const { hits, page } = result;
+    // const oldHits = page === 0 ? [] : this.state.result.hits;
+    const {searchKey, results} = this.state;
+    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+
+    const updatedHits = [...oldHits, ...hits];
+    this.setState({ results: { ...results, [searchKey]: {hits: updatedHits, page: page } }});
   }
 
   // fetch data from the api
@@ -50,7 +59,7 @@ class App extends Component {
     fetch(
       `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${
         page
-      }`
+      }&${PARAM_HPP}${DEFAULT_HPP}`
     )
       .then(response => response.json())
       .then(result => this.setTopStories(result))
@@ -58,11 +67,14 @@ class App extends Component {
   }
   // componen did mount
   componentDidMount() {
+      this.setState({searchKey: this.state.searchTerm})
     this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
   }
 
   // search new query in the API
   onSubmit(event) {
+      this.setState({searchKey: this.state.searchTerm})
+
     this.fetchTopStories(this.state.searchTerm, DEFAULT_PAGE);
     event.preventDefault();
   }
@@ -81,8 +93,9 @@ class App extends Component {
   }
 
   render() {
-    const { result, searchTerm } = this.state;
-    const page = (result && result.page) || 0;
+    const { results, searchTerm, searchKey } = this.state;
+    const page = (results && results[searchKey] && results[searchKey].page) || 0;
+    const list = (results && results[searchKey] && results[searchKey].list) || [];
     return (
       <div>
         <Grid fluid>
@@ -98,16 +111,21 @@ class App extends Component {
             </div>
           </Row>
         </Grid>
-        {result && (
+        {results && (
           <Table
-            data={result.hits}
+            data={list}
             searchTerm={searchTerm}
             removeItem={this.removeItem}
           />
         )}
-        <Button onClick={() => this.fetchTopStories(searchTerm, page + 1)}>
-          Load More
-        </Button>
+        <div className="text-center alert">
+          <Button
+            className="btn btn-success"
+            onClick={() => this.fetchTopStories(searchTerm, page + 1)}
+          >
+            Load More
+          </Button>
+        </div>
       </div>
     );
   }
@@ -162,9 +180,9 @@ class Search extends Component {
               value={this.props.value}
             />
             <span className="input-group-btn">
-              <button className="btn btn-primary searchBtn" type="submit">
+              <Button className="btn btn-primary searchBtn" type="submit">
                 Search
-              </button>
+              </Button>
             </span>
           </div>
         </FormGroup>
