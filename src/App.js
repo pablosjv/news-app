@@ -1,34 +1,19 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import './App.css';
-import { Grid, Row } from 'react-bootstrap';
+import data from './data.js';
+// import './App.css';
+import { Grid, Row, FormGroup } from 'react-bootstrap';
 
-const data = [
-  {
-    title: 'Tell me something',
-    url: 'http://kaloraat.com',
-    author: 'Pablo',
-    num_comments: 100,
-    points: 50,
-    objectID: 1
-  },
-  {
-    title: 'Oh my lord my lord',
-    url: 'http://kaloraat.com',
-    author: 'Ryan',
-    num_comments: 50,
-    points: 20,
-    objectID: 2
-  },
-  {
-    title: 'Black eyes of the silver snake',
-    url: 'http://kaloraat.com',
-    author: 'Ninja',
-    num_comments: 300,
-    points: 1000,
-    objectID: 3
-  }
-];
+//Default parameters to fetch data from the API
+
+const DEFAULT_QUERY = 'react';
+const PATH_BASE = 'http://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+
+// const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+console.log(url);
 
 function isSearched(searchTerm) {
   return item =>
@@ -40,19 +25,39 @@ class App extends Component {
     super(props);
 
     this.state = {
-      data,
-      searchTerm: ''
+      result: null,
+      searchTerm: DEFAULT_QUERY
     };
 
     this.removeItem = this.removeItem.bind(this);
     this.searchValue = this.searchValue.bind(this);
+    this.setTopStories = this.setTopStories.bind(this);
+    this.fetchTopStories = this.fetchTopStories.bind(this);
+  }
+  // update with top stories fetched
+  setTopStories(result) {
+    this.setState({ result: result });
+  }
+
+  // fetch data from the api
+  fetchTopStories(searchTerm) {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`)
+      .then(response => response.json())
+      .then(result => this.setTopStories(result))
+      .catch(e => e);
+  }
+  // componen did mount
+  componentDidMount() {
+    this.fetchTopStories(this.state.searchTerm);
   }
 
   removeItem(id) {
     let isNotID = item => item.objectID !== id;
-    const updatedData = this.state.data.filter(isNotID);
-
-    this.setState({ data: updatedData });
+    const updatedHits = this.state.result.hits.filter(isNotID);
+    // Object assignment to modified the hits in result
+    // this.setState({ result: Object.assign({}, this.state.result, {hits: updatedHits}) });
+    // Spread Operator ES6
+    this.setState({ result: {... this.state.result, hits: updatedHits} });
   }
 
   searchValue(event) {
@@ -60,22 +65,24 @@ class App extends Component {
   }
 
   render() {
-    const { data, searchTerm } = this.state;
-
+    const { result, searchTerm } = this.state;
+    if (!result){
+        return null;
+    }
     return (
-      <div className="App">
-        <Grid>
+      <div>
+        <Grid fluid>
           <Row>
-            <div className="jumbotron">
+            <div className="jumbotron text-center">
               <Search onChange={this.searchValue} value={searchTerm}>
-                Search here
+                News App
               </Search>
             </div>
           </Row>
         </Grid>
 
         <Table
-          data={data}
+          data={result.hits}
           searchTerm={searchTerm}
           removeItem={this.removeItem}
         />
@@ -110,8 +117,8 @@ class App extends Component {
 //   </div>
 // };
 
-const Button = ({ type, onClick, children }) => (
-  <button type={type} onClick={onClick}>
+const Button = ({ type, onClick, children, className = '' }) => (
+  <button className={className} type={type} onClick={onClick}>
     {children}
   </button>
 );
@@ -122,33 +129,51 @@ class Search extends Component {
   render() {
     return (
       <form>
-        {this.props.children}
-        <input
-          type="text"
-          onChange={this.props.onChange}
-          value={this.props.value}
-        />
+        <FormGroup>
+          <h1 style={{ fontWeight: 'bold' }}>{this.props.children}</h1>{' '}
+          <hr style={{ border: '2px solid black', width: '100px' }} />
+          <div className="inputGroup">
+            <input
+              className="form-control width100 searchForm"
+              type="text"
+              onChange={this.props.onChange}
+              value={this.props.value}
+            />
+            <span className="input-group-btn">
+              <button className="btn btn-primary searchBtn" type="submit">
+                Search
+              </button>
+            </span>
+          </div>
+        </FormGroup>
       </form>
     );
   }
 }
 class Table extends Component {
   render() {
-    const {data, searchTerm, removeItem} = this.props;
+
+    const { data, searchTerm, removeItem } = this.props;
     return (
-      <div>
+      <div className="col-sm-10 col-sm-offset-1">
         {data.filter(isSearched(searchTerm)).map(item => (
           <div key={item.objectID}>
             <h1>
               {' '}
-              <a href={item.url}>{item.title}</a> by {item.author}
+              <a href={item.url}>{item.title}</a>
             </h1>
             <h4>
-              {item.num_comments} Comments | {item.points} points
+              {item.author} | {item.num_comments} Comments | {item.points}{' '}
+              points
+              <Button
+                className="btn btn-danger btn-xs"
+                type="button"
+                onClick={() => removeItem(item.objectID)}
+              >
+                Remove
+              </Button>
             </h4>
-            <Button type="button" onClick={() => removeItem(item.objectID)}>
-              Remove
-            </Button>
+            <hr />
           </div>
         ))}
       </div>
@@ -165,6 +190,5 @@ class Table extends Component {
 //     );
 //   }
 // }
-
 
 export default App;
