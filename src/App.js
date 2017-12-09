@@ -33,6 +33,7 @@ class App extends Component {
     this.searchValue = this.searchValue.bind(this);
     this.setTopStories = this.setTopStories.bind(this);
     this.fetchTopStories = this.fetchTopStories.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
   // update with top stories fetched
   setTopStories(result) {
@@ -41,7 +42,7 @@ class App extends Component {
 
   // fetch data from the api
   fetchTopStories(searchTerm) {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`)
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => this.setTopStories(result))
       .catch(e => e);
@@ -51,13 +52,19 @@ class App extends Component {
     this.fetchTopStories(this.state.searchTerm);
   }
 
+  // search new query in the API
+  onSubmit(event){
+      this.fetchTopStories(this.state.searchTerm);
+      event.preventDefault()
+  }
+
   removeItem(id) {
     let isNotID = item => item.objectID !== id;
     const updatedHits = this.state.result.hits.filter(isNotID);
     // Object assignment to modified the hits in result
     // this.setState({ result: Object.assign({}, this.state.result, {hits: updatedHits}) });
     // Spread Operator ES6
-    this.setState({ result: {... this.state.result, hits: updatedHits} });
+    this.setState({ result: { ...this.state.result, hits: updatedHits } });
   }
 
   searchValue(event) {
@@ -66,26 +73,27 @@ class App extends Component {
 
   render() {
     const { result, searchTerm } = this.state;
-    if (!result){
-        return null;
-    }
+    // if (!result){
+    //     return null;
+    // }
     return (
       <div>
         <Grid fluid>
           <Row>
             <div className="jumbotron text-center">
-              <Search onChange={this.searchValue} value={searchTerm}>
+              <Search onChange={this.searchValue} value={searchTerm} onSubmit={this.onSubmit}>
                 News App
               </Search>
             </div>
           </Row>
         </Grid>
-
-        <Table
-          data={result.hits}
-          searchTerm={searchTerm}
-          removeItem={this.removeItem}
-        />
+        {result && (
+          <Table
+            data={result.hits}
+            searchTerm={searchTerm}
+            removeItem={this.removeItem}
+          />
+        )}
       </div>
     );
   }
@@ -128,7 +136,7 @@ class Search extends Component {
   // constructor() {}
   render() {
     return (
-      <form>
+      <form onSubmit={this.props.onSubmit}>
         <FormGroup>
           <h1 style={{ fontWeight: 'bold' }}>{this.props.children}</h1>{' '}
           <hr style={{ border: '2px solid black', width: '100px' }} />
@@ -152,11 +160,11 @@ class Search extends Component {
 }
 class Table extends Component {
   render() {
-
     const { data, searchTerm, removeItem } = this.props;
     return (
       <div className="col-sm-10 col-sm-offset-1">
-        {data.filter(isSearched(searchTerm)).map(item => (
+          {/* data.filter(isSearched(searchTerm)) */}
+        {data.map(item => (
           <div key={item.objectID}>
             <h1>
               {' '}
