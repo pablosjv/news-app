@@ -17,7 +17,13 @@ Button.defaultProps = {
   className: ''
 };
 
-export const Sort = ({ sortKey, onSort, children, className, activeSortKey }) => {
+export const Sort = ({
+  sortKey,
+  onSort,
+  children,
+  className,
+  activeSortKey
+}) => {
   const sortClass = ['btn default'];
 
   if (sortKey === activeSortKey) {

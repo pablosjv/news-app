@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import {Button} from '../Button/index';
+import { Button } from '../Button/index';
 import { FormGroup } from 'react-bootstrap';
-
 
 class Search extends Component {
   // constructor() {}

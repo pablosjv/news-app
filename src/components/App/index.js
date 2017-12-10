@@ -3,7 +3,7 @@ import { Grid, Row } from 'react-bootstrap';
 
 import Table from '../Table/index';
 import Search from '../Search/index';
-import {Button, Loading} from '../Button/index';
+import { Button, Loading } from '../Button/index';
 
 import {
   DEFAULT_QUERY,

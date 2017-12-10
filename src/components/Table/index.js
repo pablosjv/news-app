@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 
-import {Button, Sort} from '../Button/index'
+import { Button, Sort } from '../Button/index';
 
 // Sorting Options
 const SORT = {
