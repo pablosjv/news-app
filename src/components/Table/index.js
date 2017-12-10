@@ -48,7 +48,6 @@ class Table extends Component {
       : SORT[sortKey](data);
     return (
       <div className="col-sm-10 col-sm-offset-1">
-        <hr />
         <div className="text-center">
           {/* {sortType} */}
           <Sort

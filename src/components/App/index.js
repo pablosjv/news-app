@@ -48,8 +48,9 @@ class App extends Component {
     this.state = {
       results: null,
       searchKey: '',
-      searchTerm: DEFAULT_QUERY,
-      isLoading: false
+      searchTerm: this.props.defaultQuery || DEFAULT_QUERY,
+      isLoading: false,
+      disbleSearch: this.props.disbleSearch || false
     };
 
     this.removeItem = this.removeItem.bind(this);
@@ -118,26 +119,35 @@ class App extends Component {
   }
 
   render() {
-    const { results, searchTerm, searchKey, isLoading } = this.state;
+    const {
+      results,
+      searchTerm,
+      searchKey,
+      isLoading,
+      disbleSearch
+    } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
       (results && results[searchKey] && results[searchKey].hits) || [];
+    const searchBar = !disbleSearch ? (
+      <Grid fluid>
+        <Row>
+          <div className="jumbotron text-center">
+            <Search
+              onChange={this.searchValue}
+              value={searchTerm}
+              onSubmit={this.onSubmit}
+            >
+              News App
+            </Search>
+          </div>
+        </Row>
+      </Grid>
+    ) : null;
     return (
       <div>
-        <Grid fluid>
-          <Row>
-            <div className="jumbotron text-center">
-              <Search
-                onChange={this.searchValue}
-                value={searchTerm}
-                onSubmit={this.onSubmit}
-              >
-                News App
-              </Search>
-            </div>
-          </Row>
-        </Grid>
+        {searchBar}
 
         <Grid>
           <Row>
