@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import data from './data.js';
+import PropTypes from 'prop-types';
 // import './App.css';
 import { Grid, Row, FormGroup } from 'react-bootstrap';
-
-//Default parameters to fetch data from the API
-
-const DEFAULT_QUERY = 'react';
-const PATH_BASE = 'http://hn.algolia.com/api/v1';
-const PATH_SEARCH = '/search';
-const PARAM_SEARCH = 'query=';
-
-const DEFAULT_PAGE = 0;
-const PARAM_PAGE = 'page=';
-
-const DEFAULT_HPP = 25; // DEFAULT HITS PER PAGE
-const PARAM_HPP = 'hitsPerPage=';
+import {
+  DEFAULT_QUERY,
+  PATH_BASE,
+  PATH_SEARCH,
+  PARAM_SEARCH,
+  DEFAULT_PAGE,
+  PARAM_PAGE,
+  DEFAULT_HPP,
+  PARAM_HPP
+} from './constants';
 
 // const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}&${
@@ -188,9 +186,21 @@ const Button = ({ type, onClick, children, className = '' }) => (
   </button>
 );
 
+Button.propTypes = {
+    onClick: PropTypes.func.isRequired,
+    className: PropTypes.string,
+    children: PropTypes.node.isRequired,
+}
+
+Button.defaultProps = {
+    className: '',
+}
 // CLASS VERSION OF THE COMPONETS
 class Search extends Component {
   // constructor() {}
+  componentDidMount(){
+      this.input.focus();
+  }
   render() {
     return (
       <form onSubmit={this.props.onSubmit}>
@@ -203,6 +213,7 @@ class Search extends Component {
               type="text"
               onChange={this.props.onChange}
               value={this.props.value}
+              ref={(node) => this.input = node}
             />
             <span className="input-group-btn">
               <Button className="btn btn-primary searchBtn" type="submit">
@@ -255,5 +266,18 @@ class Table extends Component {
 //     );
 //   }
 // }
+
+Table.propTypes = {
+    data: PropTypes.arrayOf(
+        PropTypes.shape({
+            objectID: PropTypes.string.isRequired,
+            author: PropTypes.string,
+            url: PropTypes.string,
+            num_comments: PropTypes.number,
+            points: PropTypes.number
+        })
+    ).isRequired,
+    removeItem: PropTypes.func.isRequired,
+}
 
 export default App;

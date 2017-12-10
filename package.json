@@ -6,6 +6,7 @@
     "husky": "^0.14.3",
     "lint-staged": "^4.3.0",
     "prettier": "^1.8.2",
+    "prop-types": "^15.6.0",
     "react": "^16.1.0",
     "react-bootstrap": "^0.31.5",
     "react-dom": "^16.1.0",

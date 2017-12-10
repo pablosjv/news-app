@@ -8,13 +8,13 @@ body {
     border-radius: 0px!important
 }
 .searchFrom{
-    height: 50px;
-    font-size: 30px;
+    height: 70px;
+    font-size: 40px;
 }
 .searchBtn{
     height: 50px;
-    font-size: 30px;
-    width: 200px
+    font-size: 20px;
+    width: 100px
 }
 .btn{
     margin-left: 5px;
