@@ -41,6 +41,16 @@ function isSearched(searchTerm) {
     !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
 }
 
+const updateTopStories = (hits, page) => prevState => {
+  const { searchKey, results } = prevState;
+  const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+  const updatedHits = [...oldHits, ...hits];
+  return {
+    results: { ...results, [searchKey]: { hits: updatedHits, page } },
+    isLoading: false
+  };
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -49,9 +59,7 @@ class App extends Component {
       results: null,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
-      isLoading: false,
-      sortKey: 'NONE',
-      isReverseSorted: false
+      isLoading: false
     };
 
     this.removeItem = this.removeItem.bind(this);
@@ -60,14 +68,6 @@ class App extends Component {
     this.fetchTopStories = this.fetchTopStories.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.checkTopStoriesSearchTerm = this.checkTopStoriesSearchTerm.bind(this);
-    this.onSort = this.onSort.bind(this);
-  }
-
-  onSort(sortKey) {
-    const isReverseSorted =
-      this.state.sortKey === sortKey && !this.state.isReverseSorted;
-      console.log('IS REVERSE SORTED', isReverseSorted);
-    this.setState({ sortKey, isReverseSorted });
   }
 
   checkTopStoriesSearchTerm(searchTerm) {
@@ -77,16 +77,7 @@ class App extends Component {
   // update with top stories fetched
   setTopStories(result) {
     const { hits, page } = result;
-    // const oldHits = page === 0 ? [] : this.state.result.hits;
-    const { searchKey, results } = this.state;
-    const oldHits =
-      results && results[searchKey] ? results[searchKey].hits : [];
-    const updatedHits = [...oldHits, ...hits];
-
-    this.setState({
-      results: { ...results, [searchKey]: { hits: updatedHits, page } },
-      isLoading: false
-    });
+    this.setState(updateTopStories(hits, page));
   }
 
   // fetch data from the api
