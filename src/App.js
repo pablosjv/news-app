@@ -137,14 +137,7 @@ class App extends Component {
   }
 
   render() {
-    const {
-      results,
-      searchTerm,
-      searchKey,
-      isLoading,
-      sortKey,
-      isReverseSorted
-    } = this.state;
+    const { results, searchTerm, searchKey, isLoading } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -167,14 +160,7 @@ class App extends Component {
 
         <Grid>
           <Row>
-            <Table
-              data={list}
-              sortKey={sortKey}
-              onSort={this.onSort}
-              isReverseSorted={isReverseSorted}
-              searchTerm={searchTerm}
-              removeItem={this.removeItem}
-            />
+            <Table data={list} removeItem={this.removeItem} />
             <div className="text-center alert">
               {
                 <ButtonWithLoading
@@ -265,9 +251,28 @@ class Search extends Component {
     );
   }
 }
+
 class Table extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      sortKey: 'NONE',
+      isReverseSorted: false
+    };
+    this.onSort = this.onSort.bind(this);
+  }
+
+  onSort(sortKey) {
+    const isReverseSorted =
+      this.state.sortKey === sortKey && !this.state.isReverseSorted;
+    console.log('IS REVERSE SORTED', isReverseSorted);
+    this.setState({ sortKey, isReverseSorted });
+  }
+
   render() {
-    const { data, searchTerm, removeItem, sortKey, onSort, isReverseSorted } = this.props;
+    const { data, removeItem } = this.props;
+    const { searchTerm, sortKey, isReverseSorted } = this.state;
     // const sortType = [];
     // for (var key in SORT) {
     //   // skip loop if the property is from prototype
@@ -278,7 +283,9 @@ class Table extends Component {
     //     </Sort>
     //   );
     // }
-    const sortedList = isReverseSorted ? SORT[sortKey](data).reverse() : SORT[sortKey](data);
+    const sortedList = isReverseSorted
+      ? SORT[sortKey](data).reverse()
+      : SORT[sortKey](data);
     return (
       <div className="col-sm-10 col-sm-offset-1">
         {/* data.filter(isSearched(searchTerm)) */}
@@ -288,7 +295,7 @@ class Table extends Component {
           <Sort
             className="btn btn-xs btn-default sortBtn"
             sortKey={'NONE'}
-            onSort={onSort}
+            onSort={this.onSort}
             activeSortKey={sortKey}
           >
             Default
@@ -297,7 +304,7 @@ class Table extends Component {
           <Sort
             className="btn btn-xs btn-default sortBtn"
             sortKey={'TITLE'}
-            onSort={onSort}
+            onSort={this.onSort}
             activeSortKey={sortKey}
           >
             Title
@@ -306,7 +313,7 @@ class Table extends Component {
           <Sort
             className="btn btn-xs btn-default sortBtn"
             sortKey={'AUTHOR'}
-            onSort={onSort}
+            onSort={this.onSort}
             activeSortKey={sortKey}
           >
             Author
@@ -315,7 +322,7 @@ class Table extends Component {
           <Sort
             className="btn btn-xs btn-default sortBtn"
             sortKey={'COMMENTS'}
-            onSort={onSort}
+            onSort={this.onSort}
             activeSortKey={sortKey}
           >
             Comments
@@ -324,7 +331,7 @@ class Table extends Component {
           <Sort
             className="btn btn-xs btn-default sortBtn"
             sortKey={'POINTS'}
-            onSort={onSort}
+            onSort={this.onSort}
             activeSortKey={sortKey}
           >
             Points
@@ -332,8 +339,7 @@ class Table extends Component {
         </div>
         <hr />
 
-        {
-        sortedList.map(item => (
+        {sortedList.map(item => (
           <div key={item.objectID}>
             <h1>
               {' '}
@@ -382,16 +388,17 @@ Table.propTypes = {
 };
 
 const Sort = ({ sortKey, onSort, children, className, activeSortKey }) => {
-const sortClass = ['btn default'];
+  const sortClass = ['btn default'];
 
-if (sortKey === activeSortKey) {
-sortClass.push('btn btn-primary')
-}
-    return(
-  <Button className={sortClass.join(' ')} onClick={() => onSort(sortKey)}>
-    {children}
-  </Button>
-)};
+  if (sortKey === activeSortKey) {
+    sortClass.push('btn btn-primary');
+  }
+  return (
+    <Button className={sortClass.join(' ')} onClick={() => onSort(sortKey)}>
+      {children}
+    </Button>
+  );
+};
 
 const Loading = () => (
   <div>
