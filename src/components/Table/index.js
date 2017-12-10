@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import logo from '../../logo.svg';
 import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
-import { Grid, Row, FormGroup } from 'react-bootstrap';
 
 import {Button, Sort} from '../Button/index'
 
@@ -34,7 +32,7 @@ class Table extends Component {
 
   render() {
     const { data, removeItem } = this.props;
-    const { searchTerm, sortKey, isReverseSorted } = this.state;
+    const { sortKey, isReverseSorted } = this.state;
     // const sortType = [];
     // for (var key in SORT) {
     //   // skip loop if the property is from prototype
@@ -50,7 +48,6 @@ class Table extends Component {
       : SORT[sortKey](data);
     return (
       <div className="col-sm-10 col-sm-offset-1">
-        {/* data.filter(isSearched(searchTerm)) */}
         <hr />
         <div className="text-center">
           {/* {sortType} */}

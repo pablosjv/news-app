@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import logo from '../../logo.svg';
-import PropTypes from 'prop-types';
 import { Grid, Row } from 'react-bootstrap';
 
 import Table from '../Table/index';
@@ -28,10 +26,10 @@ console.log(url);
 const WithLoading = Component => ({ isLoading, ...rest }) =>
   isLoading ? <Loading /> : <Component {...rest} />;
 
-function isSearched(searchTerm) {
-  return item =>
-    !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
-}
+// function isSearched(searchTerm) {
+//   return item =>
+//     !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
+// }
 
 const updateTopStories = (hits, page) => prevState => {
   const { searchKey, results } = prevState;
